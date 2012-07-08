@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * Timeline block
+ *
+ * @author Fabrizio Branca
+ */
 class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget_Container {
 
 	/**
@@ -87,8 +93,8 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
 	 */
 	protected function loadSchedules() {
 		$collection = Mage::getModel('cron/schedule')->getCollection(); /* @var $collection Mage_Cron_Model_Mysql4_Schedule_Collection */
-		$minDate = null;
-		$maxDate = null;		
+		
+		$minDate = null; $maxDate = null;
 		
 		foreach ($collection as $schedule) { /* @var $schedule Aoe_Scheduler_Model_Schedule */
 			$startTime = $schedule->getStarttime();
@@ -178,7 +184,11 @@ class Aoe_Scheduler_Block_Adminhtml_Timeline extends Mage_Adminhtml_Block_Widget
 	 */
 	public function getGanttDivAttributes(Aoe_Scheduler_Model_Schedule $schedule) {
 
-		$duration = $schedule->getDuration() ? $schedule->getDuration() : 0;
+		if ($schedule->getStatus() == Mage_Cron_Model_Schedule::STATUS_RUNNING) {
+			$duration = time() - strtotime($schedule->getExecutedAt());
+		} else {
+			$duration = $schedule->getDuration() ? $schedule->getDuration() : 0;
+		}
 		$duration = $duration / $this->zoom;
 		$duration = ceil($duration / 4) * 4 - 1; // round to numbers dividable by 4, then remove 1 px border
 		$duration = max($duration, 3);
